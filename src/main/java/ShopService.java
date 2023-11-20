@@ -47,7 +47,7 @@ public class ShopService {
         ZonedDateTime zonedDateTime = ZonedDateTime.now();
         Order orderProcessing = new Order("0",List.of(),OrderStatus.PROCESSING,zonedDateTime);
         Order orderInDelivery = new Order("1",List.of(),OrderStatus.IN_DELIVERY,zonedDateTime);
-        Order orderCompleted = new Order("2",List.of(),OrderStatus.COMPELTED,zonedDateTime);
+        Order orderCompleted = new Order("2",List.of(),OrderStatus.COMPLETED,zonedDateTime);
 
         for(Order order : orders){
             if(order.orderStatus().equals(OrderStatus.PROCESSING)){
@@ -62,7 +62,7 @@ public class ShopService {
                 }
 
             }
-            if(order.orderStatus().equals(OrderStatus.COMPELTED)){
+            if(order.orderStatus().equals(OrderStatus.COMPLETED)){
                 if(order.orderTimestamp().isBefore(orderCompleted.orderTimestamp())){
                     orderCompleted = order;
                 }
@@ -72,10 +72,26 @@ public class ShopService {
         }
         orderStatusOldestOrderMap.put(OrderStatus.PROCESSING,orderProcessing);
         orderStatusOldestOrderMap.put(OrderStatus.IN_DELIVERY,orderInDelivery);
-        orderStatusOldestOrderMap.put(OrderStatus.COMPELTED,orderCompleted);
+        orderStatusOldestOrderMap.put(OrderStatus.COMPLETED,orderCompleted);
 
         return orderStatusOldestOrderMap;
 
+    }
+    public void transactionMethodCalls(List<String> transactionCalls){
+        if(transactionCalls.get(0).equals("addOrder")){
+            List<Product> products = new ArrayList<>();
+            for(int i = 0; i<transactionCalls.size()-2;i++){
+                Product altProduct = new Product("","");
+                products.add(new Product(transactionCalls.get(i+2),this.productRepo.getProductById(transactionCalls.get(i+2)).orElse(altProduct).name()));
+            }
+            this.orderRepo.addOrder(new Order(transactionCalls.get(1),products,OrderStatus.PROCESSING,ZonedDateTime.now()));
+        }
+        if(transactionCalls.get(0).equals("setStatus")){
+            this.orderRepo.getOrderById(transactionCalls.get(1)).withOrderStatus(OrderStatus.valueOf(transactionCalls.get(2)));
+        }
+        if(transactionCalls.get(0).equals("printOrders")){
+            System.out.println(this.orderRepo.getOrders());
+        }
     }
 
 

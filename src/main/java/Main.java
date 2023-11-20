@@ -1,4 +1,9 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -17,18 +22,23 @@ public class Main {
         pRepo.addProduct(product4);
         ShopService service = new ShopService(pRepo,oRepo);
         ZonedDateTime dateTime = ZonedDateTime.now();
-        Order order1 = new Order("11", List.of(product1,product2),OrderStatus.PROCESSING,dateTime);
-        Order order2 = new Order("12", List.of(product3,product4),OrderStatus.PROCESSING,dateTime);
-        Order order3 = new Order("13", List.of(product1,product4),OrderStatus.PROCESSING,dateTime);
-
-        try {
-            service.addOrder(List.of("2","3"));
-            service.addOrder(List.of("1","3"));
-            service.addOrder(List.of("2","4"));
-        } catch (ProductDoesNotExistException e) {
-            throw new RuntimeException(e);
-        }
         System.out.println(service.findOrdersWithSpecificOrderStatus(OrderStatus.PROCESSING));
+        try{
+            List<String> lines = Files.readAllLines(Path.of("C:\\Users\\Thorsten Thomann\\IdeaProjects\\" +
+                    "Recap-Project-ShopService\\src\\main\\java\\transactions.txt"));
+            System.out.println(lines);
+            for(String line : lines) {
+                String[] line1 = line.split(" ",-1);
+                List<String> call = Arrays.stream(line1).toList();
+                service.transactionMethodCalls(call);
+            }
+            System.out.println(service.getOldestOrderPerStatus());
+        } catch (IOException e){
+            System.out.println(e.getMessage());
+        }
+
 
     }
+
+
 }
