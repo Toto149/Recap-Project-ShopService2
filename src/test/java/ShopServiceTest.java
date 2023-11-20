@@ -13,10 +13,13 @@ class ShopServiceTest {
         List<String> productsIds = List.of("1");
 
         //WHEN
-        Order actual = shopService.addOrder(productsIds);
-
+        try {
+            Order actual = shopService.addOrder(productsIds);
+        } catch(ProductDoesNotExistException e){
+            System.out.println(e.getMessage());
+        }
         //THEN
-        Order expected = new Order("-1", List.of(new Product("1", "Apfel")));
+        Order expected = new Order("-1", List.of(new Product("1", "Apfel")),OrderStatus.PROCESSING);
         assertEquals(expected.products(), actual.products());
         assertNotNull(expected.id());
     }
