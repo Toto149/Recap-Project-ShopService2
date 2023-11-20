@@ -34,7 +34,12 @@ class ShopServiceTest {
         List<String> productsIds = List.of("1", "2");
 
         //WHEN
-        Order actual = shopService.addOrder(productsIds);
+        Order actual = null;
+        try{
+            actual = shopService.addOrder(productsIds);
+        } catch (ProductDoesNotExistException e){
+            System.out.println(e.getMessage());
+        }
 
         //THEN
         assertNull(actual);
