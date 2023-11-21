@@ -1,15 +1,17 @@
-import lombok.AllArgsConstructor;
-import lombok.With;
+import lombok.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+@RequiredArgsConstructor
 @AllArgsConstructor
 public class ShopService {
     private ProductRepo productRepo = new ProductRepo();
     private OrderRepo orderRepo = new OrderMapRepo();
+    private IdService idService = new IdService();
 
     public Order addOrder(List<String> productIds) throws ProductDoesNotExistException {
 
@@ -20,11 +22,13 @@ public class ShopService {
                 throw new ProductDoesNotExistException("Dieses Produkt konnte nicht gefunden werden");
             }
             products.add(productToOrder.get());
+            productToOrder = Optional.ofNullable(productToOrder.get().withQuantity(productToOrder.get().quantity() - 1));
+
         }
         ZonedDateTime dateTime = ZonedDateTime.of(2023,10,10,
                                                 10,10,10, 0,
                                                 ZoneId.of("GMT"));
-        Order newOrder = new Order(UUID.randomUUID().toString(), products,OrderStatus.PROCESSING, dateTime);
+        Order newOrder = new Order(this.idService.generateId().toString(), products,OrderStatus.PROCESSING, dateTime);
 
         return orderRepo.addOrder(newOrder);
     }
@@ -81,8 +85,10 @@ public class ShopService {
         if(transactionCalls.get(0).equals("addOrder")){
             List<Product> products = new ArrayList<>();
             for(int i = 0; i<transactionCalls.size()-2;i++){
-                Product altProduct = new Product("","");
-                products.add(new Product(transactionCalls.get(i+2),this.productRepo.getProductById(transactionCalls.get(i+2)).orElse(altProduct).name()));
+                Product altProduct = new Product("","",0);
+                products.add(new Product(transactionCalls.get(i+2),
+                        this.productRepo.getProductById(transactionCalls.get(i+2)).orElse(altProduct).name(),
+                        this.productRepo.getProductById(transactionCalls.get(i+2)).orElse(altProduct).quantity()-1));
             }
             this.orderRepo.addOrder(new Order(transactionCalls.get(1),products,OrderStatus.PROCESSING,ZonedDateTime.now()));
         }

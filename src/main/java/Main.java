@@ -12,23 +12,26 @@ public class Main {
 
         OrderRepo oRepo = new OrderListRepo();
         ProductRepo pRepo = new ProductRepo();
-        Product product1 = new Product("1","Apfel");
-        Product product2 = new Product("2","Birne");
-        Product product3 = new Product("3","Orange");
-        Product product4 = new Product("4","Wassermelone");
+        IdService idService = new IdService();
+        Product product1 = new Product("1","Apfel",1);
+        Product product2 = new Product("2","Birne",2);
+        Product product3 = new Product("3","Orange",2);
+        Product product4 = new Product("4","Wassermelone",3);
+        Product product5 = new Product(idService.generateId().toString(), "Banane",5);
         pRepo.addProduct(product1);
         pRepo.addProduct(product2);
         pRepo.addProduct(product3);
         pRepo.addProduct(product4);
-        ShopService service = new ShopService(pRepo,oRepo);
+        pRepo.addProduct(product5);
+        ShopService service = new ShopService(pRepo,oRepo,idService);
         ZonedDateTime dateTime = ZonedDateTime.now();
-        System.out.println(service.findOrdersWithSpecificOrderStatus(OrderStatus.PROCESSING));
+        System.out.println(pRepo);
         try{
             List<String> lines = Files.readAllLines(Path.of("C:\\Users\\Thorsten Thomann\\IdeaProjects\\" +
                     "Recap-Project-ShopService\\src\\main\\java\\transactions.txt"));
             System.out.println(lines);
             for(String line : lines) {
-                String[] line1 = line.split(" ",-1);
+                String[] line1 = line.split(" ");
                 List<String> call = Arrays.stream(line1).toList();
                 service.transactionMethodCalls(call);
             }
